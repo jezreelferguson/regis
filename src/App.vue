@@ -8,6 +8,7 @@ interface Form {
   name: string;
   phone: string;
   location: string;
+  church?: string;
 }
 const cleanPhone = (val: string) => {
   form.value.phone = val.replace(/\D/g, '');
@@ -19,6 +20,7 @@ const form = ref<Form>({
   name: "",
   phone: "",
   location: "",
+  church: "",
 });
 
 const loader = ref<boolean>(false);
@@ -57,6 +59,8 @@ const submit = async (e: Event): Promise<void> => {
             { name: "Name", value: form.value.name, inline: true },
             { name: "Phone", value: form.value.phone, inline: true },
             { name: "Location", value: form.value.location, inline: true },
+            { name: "Church", value: form.value.church , inline: true },
+
           ],
           timestamp: new Date().toISOString(),
         },
@@ -72,15 +76,18 @@ const submit = async (e: Event): Promise<void> => {
     // Format phone number for Google Sheets (remove +, (, ), spaces)
     const formattedPhone = form.value.phone.replace(/[+()\s-]/g, "");
 
-    await fetch(googleSheetUrl, {
+   const res2 = await fetch(googleSheetUrl, {
       method: "POST",
       mode: "no-cors",
       body: JSON.stringify({
         name: form.value.name,
         phone: formattedPhone,
         location: form.value.location,
+        church: form.value.church ,
       }),
     });
+
+    console.log("Google Sheets Res:", res2);
 
 
 
@@ -152,8 +159,15 @@ const submit = async (e: Event): Promise<void> => {
             class="input"
           />
 
+          <input
+            type="text"
+            placeholder="Church (Optional)"
+            v-model="form.church"
+            class="input"
+          />
+
           <button type="submit" class="btn">
-            {{ loader ? "Submitting" : "Submit" }}
+            {{ loader ? "Submitting..." : "Submit" }}
           </button>
         </form>
       </div>
