@@ -9,6 +9,11 @@ interface Form {
   phone: string;
   location: string;
 }
+const cleanPhone = (val: string) => {
+  form.value.phone = val.replace(/\D/g, '');
+}
+
+
 
 const form = ref<Form>({
   name: "",
@@ -64,15 +69,18 @@ const submit = async (e: Event): Promise<void> => {
       },
     });
 
-   await fetch(googleSheetUrl, {
-  method: "POST",
-  mode: "no-cors",
-  body: JSON.stringify({
-    name: form.value.name,
-    phone: form.value.phone,
-    location: form.value.location,
-  }),
-});
+    // Format phone number for Google Sheets (remove +, (, ), spaces)
+    const formattedPhone = form.value.phone.replace(/[+()\s-]/g, "");
+
+    await fetch(googleSheetUrl, {
+      method: "POST",
+      mode: "no-cors",
+      body: JSON.stringify({
+        name: form.value.name,
+        phone: formattedPhone,
+        location: form.value.location,
+      }),
+    });
 
 
 
@@ -124,14 +132,16 @@ const submit = async (e: Event): Promise<void> => {
             v-model="form.name"
             class="input"
           />
-          <vue-tel-input
-            v-model="form.phone"
-            defaultCountry="gh"
-            mode="international"
-            :autoFormat="true"
-            :validCharactersOnly="true"
-            class="input"
-          />
+         <vue-tel-input
+  v-model="form.phone"
+  defaultCountry="gh"
+  mode="international"
+  :autoFormat="false"
+  :validCharactersOnly="true"
+  @input="cleanPhone"
+  class="input"
+/>
+
 
           <input
             type="text"
